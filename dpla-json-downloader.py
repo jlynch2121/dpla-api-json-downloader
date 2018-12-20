@@ -45,7 +45,7 @@ errorWriter = csv.writer(errorLog)
 errorLogColumnNames = [['collection','error']]
 errorWriter.writerows(errorLogColumnNames)
 
-with open('idhhAllCollections.csv', newline='', encoding='utf-8') as csv_file:
+with open('csv-file-name.csv', newline='', encoding='utf-8') as csv_file:
   csv_reader = csv.reader(csv_file)
   
   # begin a for loop that will grab each row of the CSV and strip its whitespace

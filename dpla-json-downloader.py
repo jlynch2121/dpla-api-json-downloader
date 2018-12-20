@@ -11,7 +11,7 @@ import sys
 import shutil
 
 # variable for folder that will contain collections' metadata
-folder = 'idhhAllCollections'
+folder = 'YOUR_FOLDER_NAME'
 
 # variable for API key
 apiKey = 'YOUR_API_KEY'

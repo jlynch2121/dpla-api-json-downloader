@@ -13,11 +13,21 @@ import shutil
 # variable for folder that will contain collections' metadata
 folder = 'YOUR_FOLDER_NAME'
 
+# base URL for DPLA api
+apiBase = 'https://api.dp.la/v2/items?'
+
+# fields to be provided in the results. In this case: item title, contributing institution, local URI, collection title, and type metadata
+# note: the deprecated field, "originalRecord.type" has been removed. This data can no longer be retrieved from the API
+fields = 'sourceResource.title,dataProvider,isShownAt,sourceResource.collection.title,sourceResource.type'
+
 # variable for API key
 apiKey = 'YOUR_API_KEY'
 
-# variable for Service Hub name. It is recommended to use plus signs '+' instead of spaces between words in the hub name, as demonstrated below
-serviceHub = 'Service+Hub+Name'
+# variable for Service Hub identifier
+hubId = 'YOUR_SERVICE_HUB_ID'
+
+# variable for csv file of collections
+collectionList = 'YOUR_CSV_FILE.csv'
 
 # variable for error log file name
 eLog = 'errors.csv'
@@ -33,40 +43,34 @@ if os.path.exists(folder):
     else:
         print('Keyboard input not recognized. Goodbye.')
         sys.exit()
-        
+
 os.makedirs(folder)
 
 # create an error log that will be populated if there are problems with the website interaction
 if os.path.exists(eLog):
     os.remove(eLog)
-    
+
 errorLog = open(eLog, 'w', newline='')
 errorWriter = csv.writer(errorLog)
 errorLogColumnNames = [['collection','error']]
 errorWriter.writerows(errorLogColumnNames)
 
-with open('csv-file-name.csv', newline='', encoding='utf-8') as csv_file:
+with open(collectionList, newline='', encoding='utf-8') as csv_file:
   csv_reader = csv.reader(csv_file)
-  
+
   # begin a for loop that will grab each row of the CSV and strip its whitespace
   for row in csv_reader:
     # strip row of whitespace
     collection = row[0].strip()
-    
-    """ 
-        create API request. Note: it is not necessary to include 'provider.name' but this helps to insure data is from the correct service hub in case there are problems with the collection name. The request below will provide:
-        sourceResource.title: the title of the item
-        dataProvider: the contributing institution
-        sourceResource.collection.title: the title of the collection of which the record is a part
-        originalRecord.type: original Type metadata value harvested by the DPLA
-        sourceResource.type: Type metadata value created by the DPLA which should appear in DPLA search interfaces
-    """
-    apiRequest = 'https://api.dp.la/v2/items?api_key=' + apiKey + '&fields=sourceResource.title,dataProvider,isShownAt,sourceResource.collection.title,originalRecord.type,sourceResource.type&page_size=500&provider.name=' + serviceHub + '&sourceResource.collection.title=' + '"' + collection + '"'
-    
-    
+
+    # create API request
+    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields +
+    '&page_size=500&provider.@id=' + hubId + '&sourceResource.collection.title=' +
+    '"' + collection + '"'
+
     # make request
     r = requests.get(apiRequest)
-    
+
     # check to make sure data exists:
     if (r.status_code == 200):
         # read the JSON file and check for the value of 'count':
@@ -82,11 +86,11 @@ with open('csv-file-name.csv', newline='', encoding='utf-8') as csv_file:
             # download files
             with open(jsonDir, 'wb') as f:
               f.write(r.content)
-            
+
             """
                 The following deals with the DPLA API's record limit of 500 results per page, identifying sets with more than 500 records and advancing pages the appropriate number of times
             """
-            
+
             # if count is larger than 500:
             if itemCount > 500:
                 # divide count by 500 rounded up and save as variable for a stopping point of a loop, below
@@ -96,9 +100,9 @@ with open('csv-file-name.csv', newline='', encoding='utf-8') as csv_file:
                 for x in range(2, (pages + 1)):
                   apiPages = apiRequest + '&page=' + str(x)
                   s = requests.get(apiPages)
-                  
+
                   jsonDir = folder + '/' + collection + str(x) + '.json'
-                  
+
                   with open(jsonDir, 'wb') as g:
                     g.write(s.content)
         # log error if JSON dataset is empty:

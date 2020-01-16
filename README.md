@@ -10,7 +10,7 @@ To run this script, provide appropriate values for variables near beginning of p
 - API key for querying the DPLA API
 - Fields you want provided
 - ID of a Service Hub
-- Name of the csv file with provider titles.
+- Name of the csv file with provider titles. A csv including all your hub's provider names can be downloaded from the [DPLA Analytics Dashboard](https://analytics-dashboard.dp.la/).
 
 Run script in same directory as the csv file with collection titles.
 

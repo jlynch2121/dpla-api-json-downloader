@@ -23,7 +23,7 @@ fields = 'sourceResource.title,dataProvider,isShownAt,sourceResource.collection.
 # variable for API key
 apiKey = 'YOUR_API_KEY'
 
-# variable for Service Hub identifier
+# variable for Service Hub identifier: makes record retrieval more precise if collection names are the same across the DPLA's 1,000s of data sets
 hubId = 'YOUR_SERVICE_HUB_ID'
 
 # variable for csv file of collections
@@ -64,9 +64,7 @@ with open(collectionList, newline='', encoding='utf-8') as csv_file:
     collection = row[0].strip()
 
     # create API request
-    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields +
-    '&page_size=500&provider.@id=' + hubId + '&sourceResource.collection.title=' +
-    '"' + collection + '"'
+    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields + '&page_size=500&provider.@id=' + '"' + hubId + '"' + '&sourceResource.collection.title=' + '"' + collection + '"'
 
     # make request
     r = requests.get(apiRequest)

@@ -16,18 +16,18 @@ folder = 'YOUR_FOLDER_NAME'
 # base URL for DPLA api
 apiBase = 'https://api.dp.la/v2/items?'
 
-# fields to be provided in the results. In this case: item title, contributing institution, local URI, collection title, and type metadata
+# fields to be provided in the results. In this case: item title, DPLA id, contributing institution, local URI, collection title, and type metadata
 # note: the deprecated field, "originalRecord.type" has been removed. This data can no longer be retrieved from the API
-fields = 'sourceResource.title,dataProvider,isShownAt,sourceResource.collection.title,sourceResource.type'
+fields = 'sourceResource.title,id,dataProvider,isShownAt,sourceResource.collection.title,sourceResource.type'
 
 # variable for API key
 apiKey = 'YOUR_API_KEY'
 
-# variable for Service Hub identifier: makes record retrieval more precise if collection names are the same across the DPLA's 1,000s of data sets
+# variable for Service Hub identifier: makes record retrieval more precise if provider names are the same across the DPLA's 1,000s of data sets
 hubId = 'YOUR_SERVICE_HUB_ID'
 
-# variable for csv file of collections
-collectionList = 'YOUR_CSV_FILE.csv'
+# variable for csv file of provider list --this can be downloaded from DPLA analytics
+providerList = 'YOUR_CSV_FILE.csv'
 
 # variable for error log file name
 eLog = 'errors.csv'
@@ -55,16 +55,16 @@ errorWriter = csv.writer(errorLog)
 errorLogColumnNames = [['collection','error']]
 errorWriter.writerows(errorLogColumnNames)
 
-with open(collectionList, newline='', encoding='utf-8') as csv_file:
+with open(providerList, newline='', encoding='utf-8') as csv_file:
   csv_reader = csv.reader(csv_file)
 
   # begin a for loop that will grab each row of the CSV and strip its whitespace
   for row in csv_reader:
     # strip row of whitespace
-    collection = row[0].strip()
+    provider = row[0].strip()
 
     # create API request
-    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields + '&page_size=500&provider.@id=' + '"' + hubId + '"' + '&sourceResource.collection.title=' + '"' + collection + '"'
+    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields + '&page_size=500&provider.@id=' + '"' + hubId + '"' + '&dataProvider=' + '"' + provider + '"'
 
     # make request
     r = requests.get(apiRequest)
@@ -79,7 +79,7 @@ with open(collectionList, newline='', encoding='utf-8') as csv_file:
         # test to make sure API is not returning an empty set:
         if (itemCount > 0):
             #create variable for folder and json file
-            jsonDir = folder + '/' + collection + str(1) + '.json'
+            jsonDir = folder + '/' + provider + str(1) + '.json'
 
             # download files
             with open(jsonDir, 'wb') as f:
@@ -99,17 +99,17 @@ with open(collectionList, newline='', encoding='utf-8') as csv_file:
                   apiPages = apiRequest + '&page=' + str(x)
                   s = requests.get(apiPages)
 
-                  jsonDir = folder + '/' + collection + str(x) + '.json'
+                  jsonDir = folder + '/' + provider + str(x) + '.json'
 
                   with open(jsonDir, 'wb') as g:
                     g.write(s.content)
         # log error if JSON dataset is empty:
         else:
-            print('Error retrieving data for collection: ' + collection)
-            emptyError = [[collection,'Data set is empty']]
+            print('Error retrieving data for provider: ' + provider)
+            emptyError = [[provider,'Data set is empty']]
             errorWriter.writerows(emptyError)
     # log error if data does not exist:
     else:
-        print('Error retrieving data for collection: ' + collection)
-        existenceError = [[collection,'Data does not exist']]
+        print('Error retrieving data for provider: ' + provider)
+        existenceError = [[provider,'Data does not exist']]
         errorWriter.writerows(existenceError)

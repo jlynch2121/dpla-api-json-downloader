@@ -1,6 +1,6 @@
 # dpla-api-json-downloader
 
-This calls the DPLA-API, using provider titles provided in a CSV and downloads JSON-LD metadata for those collections.
+This calls the DPLA-API, using provider titles provided in a CSV and downloads JSON-LD metadata for those providers.
 
 For best results, provider titles listed in the CSV should include plus signs ('+') instead of spaces between words, i.e. 'dataProvider+title' rather than 'dataProvider title'.
 
@@ -14,7 +14,7 @@ To run this script, provide appropriate values for variables near beginning of p
 
 Run script in same directory as the csv file with collection titles.
 
-Note: for the API request, it is not necessary to include 'provider.@id' but this helps to insure data is from the correct service hub in case there are multiple institutions of the same name across DPLA's data. The pre-formatted current request will provide:
+Note: for the API request, it is not necessary to include 'provider.@id' but this helps to insure data is from the correct service hub in case there are multiple institutions of the same name across DPLA's data. The default request will provide:
 
 - sourceResource.title: the title of the item
 - id: the items DPLA ID

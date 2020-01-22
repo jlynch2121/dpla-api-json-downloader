@@ -93,6 +93,10 @@ with open(providerList, newline='', encoding='utf-8') as csv_file:
             if itemCount > 500:
                 # divide count by 500 rounded up and save as variable for a stopping point of a loop, below
                 pages = math.ceil(itemCount / 500)
+                
+                # Do not download empty json files beyond DPLA API's 100 page call limit
+                if pages > 100:
+                    pages = 100
 
                 # loop that iterates for each page in a big data set
                 for x in range(2, (pages + 1)):

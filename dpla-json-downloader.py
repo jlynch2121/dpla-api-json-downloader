@@ -32,19 +32,25 @@ providerList = 'YOUR_CSV_FILE.csv'
 # variable for error log file name
 eLog = 'errors.csv'
 
-# catch a folder that already exists in the directory with the same name. Prompt user for action
+""" 
+    catch a folder that already exists in the directory with the same name. Prompt user for action: (y)es to overwrite, (n)o, don't overwrite, or (i)nclude new files in folder
+"""
 if os.path.exists(folder):
-    decision = input('The folder, "' + folder + '", already exists. Would you like to overwrite it? y/n\n')
+    decision = input('The folder, "' + folder + '", already exists. Would you like to overwrite it or include files in it? Note that the inclusion option will not write a new file if a file of the same name already exists. Enter "y" to overwrite, "i" to include, or "n" to do nothing:\n')
     if decision == 'y' or decision == 'Y':
+        print('Overwriting existing folder...')
         shutil.rmtree(folder)
+        os.makedirs(folder)
+    elif decision == 'i' or decision == 'I':
+        print('Including new files in existing folder...')
     elif decision == 'n' or decision == 'N':
         print('Goodbye.')
         sys.exit()
     else:
         print('Keyboard input not recognized. Goodbye.')
         sys.exit()
-
-os.makedirs(folder)
+else:
+    os.makedirs(folder)
 
 # create an error log that will be populated if there are problems with the website interaction
 if os.path.exists(eLog):
@@ -58,13 +64,22 @@ errorWriter.writerows(errorLogColumnNames)
 with open(providerList, newline='', encoding='utf-8') as csv_file:
   csv_reader = csv.reader(csv_file)
 
-  # begin a for loop that will grab each row of the CSV and strip its whitespace
+  # begin a for loop that will grab each row of the CSV, strip its whitespace, quote values with API forbidden chars
   for row in csv_reader:
     # strip row of whitespace
     provider = row[0].strip()
+    """        
+        provider names with certain forbidden characters will need to be placed in quotes.
+        Note: Please update; there are probably more forbidden characters. slashes and colons are 
+        the only ones I've noticed
+    """
+    forbidden = r'\/:'
+    
+    if any(elem in provider for elem in forbidden):
+        provider = '"' + provider + '"'
 
     # create API request
-    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields + '&page_size=500&provider.@id=' + '"' + hubId + '"' + '&dataProvider=' + '"' + provider + '"'
+    apiRequest = apiBase + 'api_key=' + apiKey + '&fields=' + fields + '&page_size=500&provider.@id=' + '"' + hubId + '"' + '&dataProvider=' + provider
 
     # make request
     r = requests.get(apiRequest)
@@ -78,6 +93,20 @@ with open(providerList, newline='', encoding='utf-8') as csv_file:
 
         # test to make sure API is not returning an empty set:
         if (itemCount > 0):
+            
+            # test for and remove reservered characters in provider name before creating file path
+            reservedChars = r'<>:"/\|?*., '
+            
+            if any(elem in provider for elem in reservedChars):
+                provider = provider.translate(dict.fromkeys(map(ord, reservedChars)))
+                
+            # truncate especially long file names
+            maxLength = 90
+            
+            if len(provider) > maxLength:
+                print('Truncating file name "' + provider + '" to max length of ' + str(maxLength) + ' characters')
+                provider = provider[:maxLength]
+                
             #create variable for folder and json file
             jsonDir = folder + '/' + provider + str(1) + '.json'
 
@@ -100,13 +129,13 @@ with open(providerList, newline='', encoding='utf-8') as csv_file:
 
                 # loop that iterates for each page in a big data set
                 for x in range(2, (pages + 1)):
-                  apiPages = apiRequest + '&page=' + str(x)
-                  s = requests.get(apiPages)
+                    apiPages = apiRequest + '&page=' + str(x)
+                    s = requests.get(apiPages)
 
-                  jsonDir = folder + '/' + provider + str(x) + '.json'
+                    jsonDir = folder + '/' + provider + str(x) + '.json'
 
-                  with open(jsonDir, 'wb') as g:
-                    g.write(s.content)
+                    with open(jsonDir, 'wb') as g:
+                        g.write(s.content)
         # log error if JSON dataset is empty:
         else:
             print('Error retrieving data for provider: ' + provider)

@@ -33,7 +33,7 @@ providerList = 'YOUR_CSV_FILE.csv'
 eLog = 'errors.csv'
 
 """ 
-    catch a folder that already exists in the directory with the same name. Prompt user for action: (y)es to overwrite, (n)o, don't overwrite, or (i)nclude new files in folder
+    catch a folder that already exists in the directory with the same name. Prompt user for action: (y)es to overwrite, (n)o, don't overwrite and exit, or (i)nclude new files in folder
 """
 if os.path.exists(folder):
     decision = input('The folder, "' + folder + '", already exists. Would you like to overwrite it or include files in it? Note that the inclusion option will not write a new file if a file of the same name already exists. Enter "y" to overwrite, "i" to include, or "n" to do nothing:\n')
@@ -73,7 +73,7 @@ with open(providerList, newline='', encoding='utf-8') as csv_file:
         Note: Please update; there are probably more forbidden characters. slashes and colons are 
         the only ones I've noticed
     """
-    forbidden = r'\/:'
+    forbidden = r'\/:?'
     
     if any(elem in provider for elem in forbidden):
         provider = '"' + provider + '"'

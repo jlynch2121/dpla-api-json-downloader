@@ -12,16 +12,16 @@ To run this script, provide appropriate values for variables near beginning of p
 - ID of a Service Hub
 - Name of the csv file with provider titles. A csv including all your hub's provider names can be downloaded from the [DPLA Analytics Dashboard](https://analytics-dashboard.dp.la/).
 
-Run script in same directory as the csv file with collection titles.
+Run script in same directory as the csv file with provider names.
 
-Note: for the API request, it is not necessary to include 'provider.@id' but this helps to insure data is from the correct service hub in case there are multiple institutions of the same name across DPLA's data. The default request will provide:
+Note: for the API request, it is not necessary to include 'provider.@id' but this helps to insure data is from the correct service hub in case there are multiple entities of the same name across DPLA's data. The default request will provide:
 
 - sourceResource.title: the title of the item
 - id: the items DPLA ID
 - isShownAt: the item's local ID
 dataProvider: the contributing institution
 - sourceResource.collection.title: the title of the collection of which the record is a part
-- originalRecord.type: Deprecated. original Type metadata value harvested by the DPLA. After Ingestion 3, entire original records are provided as a single string and code for extraction will depend on the format of the hub's original records
+- originalRecord.type: Deprecated. original Type metadata value harvested by the DPLA. After Ingestion 3, entire original records are provided as a single string and code for extracting individual fields and values will depend on the format of the hub's original records
 - sourceResource.type: Type metadata value created by the DPLA which should appear in DPLA search interfaces
 
 Script was built and run on a machine with Python 3.7. Has not been tested on earlier versions of Python
